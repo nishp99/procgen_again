@@ -27,7 +27,7 @@ evaluation_path = os.path.join(data, "evaluation_data")
 os.makedirs(evaluation_path, exist_ok = True)
 
 outputpath = os.path.join(results_run, "outputs")
-os.makedirs(experiment_path, exist_ok = True)
+os.makedirs(outputpath, exist_ok = True)
 
 executor = submitit.AutoExecutor(folder=outputpath)
 executor.update_parameters(timeout_min = 6000, mem_gb = 5, gpus_per_node = 0, cpus_per_task = 1, slurm_array_parallelism = 128)
