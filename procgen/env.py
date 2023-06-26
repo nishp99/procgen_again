@@ -82,6 +82,7 @@ class BaseProcgenEnv(CEnv):
         resource_root=None,
         num_threads=4,
         render_mode=None,
+        agent_health=1
     ):
         if resource_root is None:
             resource_root = os.path.join(SCRIPT_DIR, "data", "assets") + os.sep
@@ -93,7 +94,8 @@ class BaseProcgenEnv(CEnv):
             assert not debug, "debug has no effect for pre-compiled library"
         else:
             # only compile if we don't find a pre-built binary
-            lib_dir = build(debug=debug)
+            lib_dir = os.path.join(SCRIPT_DIR, ".build", "relwithdebinfo")
+            #lib_dir = build(debug=debug)
         
         self.combos = self.get_combos()
 
@@ -120,6 +122,7 @@ class BaseProcgenEnv(CEnv):
                 "render_human": render_human,
                 # these will only be used the first time an environment is created in a process
                 "resource_root": resource_root,
+                "agent_health": agent_health
             }
         )
 
@@ -132,6 +135,7 @@ class BaseProcgenEnv(CEnv):
             c_func_defs=[
                 "int get_state(libenv_env *, int, char *, int);",
                 "void set_state(libenv_env *, int, char *, int);",
+                "void game_reset(libenv_env *);"
             ],
         )
         # don't use the dict space for actions
@@ -198,6 +202,9 @@ class BaseProcgenEnv(CEnv):
         # tensorflow may return int64 actions (https://github.com/openai/gym/blob/master/gym/spaces/discrete.py#L13)
         # so always cast actions to int32
         return super().act({"action": ac.astype(np.int32)})
+
+    def reset(self):
+        self.call_c_func("game_reset")
 
 
 class ProcgenGym3Env(BaseProcgenEnv):

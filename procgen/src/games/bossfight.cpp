@@ -46,6 +46,9 @@ class BossfightGame : public BasicAbstractGame {
     int player_laser_theme = 0;
     int boss_laser_theme = 0;
     int damaged_until_time = 0;
+    int agent_health = 1;
+
+    int max_time = 100;
     
     bool shields_are_up = false;
     bool barriers_moves_right = false;
@@ -67,6 +70,8 @@ class BossfightGame : public BasicAbstractGame {
 
         mixrate = .5;
         maxspeed = 0.85f;
+
+        agent_health = options.agent_health;
     }
 
     void load_background_images() override {
@@ -112,10 +117,16 @@ class BossfightGame : public BasicAbstractGame {
         if (obj->type == BOSS) {
             step_data.done = true;
         } else if (obj->type == BARRIER) {
-            step_data.done = true;
+            agent_health -= 1;
+            step_data.reward -= 1;
         }
         if (obj->type == ENEMY_BULLET) {
-            step_data.done = true;
+            
+            obj->will_erase = true; // Erase projectile
+            agent_health -= 1; // Subtract a life
+            step_data.reward -= 1;
+            //if (agent_health == 0)
+                //step_data.done = true;
         }
     }
 
@@ -207,7 +218,7 @@ class BossfightGame : public BasicAbstractGame {
         boss_bullet_vel = options.distribution_mode == EasyMode ? .5 : .75;
         int max_extra_invulnerable = options.distribution_mode == EasyMode ? 1 : 3;
 
-        options.center_agent = false;
+        options.center_agent = true;
 
         boss = add_entity(main_width / 2, main_height / 2, 0, 0, BOSS_R, BOSS);
         choose_random_theme(boss);
@@ -238,16 +249,20 @@ class BossfightGame : public BasicAbstractGame {
         round_num = 0;
         prepare_boss();
 
-        agent->rx = .75;
-        match_aspect_ratio(agent);
-        reposition_agent();
-        agent->y = agent->ry;
+        agent_health = options.agent_health;
+
+        
 
         barrier_vel = 0.1f;
         barriers_moves_right = rand_gen.randbool();
         barrier_spawn_prob = 0.025f;
 
-        spawn_barriers();
+        spawn_edge_barriers();
+
+        agent->rx = .75;
+        match_aspect_ratio(agent);
+        reposition_agent();
+        agent->y = agent->ry;
 
         // for (int i = 0; i < main_width / barrier_vel; i++) {
         //     spawn_barriers();
@@ -323,6 +338,36 @@ class BossfightGame : public BasicAbstractGame {
         } else if (attack_mode == 3) {
             attack_mode_3();
         }
+    }
+
+    void spawn_edge_barriers() {
+
+            float barrier_r = 0.6f;
+            float ent_y =  barrier_r + .5;
+
+            float ent_x = main_width - barrier_r;
+            auto ent = std::make_shared<Entity>(ent_x, ent_y, 0, 0, barrier_r, BARRIER);
+            choose_random_theme(ent);
+            match_aspect_ratio(ent);
+            ent->health = 3;
+            ent->collides_with_entities = true;
+
+            if (!has_any_collision(ent)) {
+                entities.push_back(ent);
+            }
+
+            ent_x = barrier_r;
+
+            auto ent2 = std::make_shared<Entity>(ent_x, ent_y, 0, 0, barrier_r, BARRIER);
+            choose_random_theme(ent2);
+            match_aspect_ratio(ent2);
+            ent2->health = 3000;
+            ent2->collides_with_entities = true;
+
+            if (!has_any_collision(ent2)) {
+                entities.push_back(ent2);
+            }
+
     }
 
     void spawn_barriers() {
@@ -409,6 +454,9 @@ class BossfightGame : public BasicAbstractGame {
                 trail->rotation = ent->rotation;
                 trail->expire_time = 8;
             }
+        }
+        if (cur_time > max_time) { // Stop episode at deadline
+            step_data.done = true;
         }
     }
 
