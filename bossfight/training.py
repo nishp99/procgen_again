@@ -3,10 +3,10 @@ from gym3 import types_np
 import numpy as np
 import os
 import sys
-import path
 
-directory = path.path('training.py').abspath()
-sys.path.append(directory.parent.parent)
+current = os.path.dirname(os.path.realpath('training.py'))
+parent = os.path.dirname(current)
+sys.path.append(parent)
 #import procgen.ProcgenGym3Env
 from procgen_again.procgen import ProcgenGym3Env
 
