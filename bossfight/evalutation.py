@@ -3,11 +3,10 @@ from gym3 import types_np
 import numpy as np
 import sys
 import path
-#directory = path.path('evaluation.py').abspath()
-#sys.path.append(directory.parent.parent)
+directory = path.path('evaluation.py').abspath()
+sys.path.append(directory.parent.parent)
 
-#from procgen_fork.procgen import ProcgenGym3Env
-import procgen.ProcgenGym3Env
+from procgen_again.procgen import ProcgenGym3Env
 
 # Evaluate agents using softmax policy
 

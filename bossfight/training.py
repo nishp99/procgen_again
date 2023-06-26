@@ -2,10 +2,13 @@ import gym3
 from gym3 import types_np
 import numpy as np
 import os
-#directory = path.path('evaluation.py').abspath()
-#sys.path.append(directory.parent.parent)
-import procgen.ProcgenGym3Env
-#from procgen import ProcgenGym3Env
+import sys
+import path
+
+directory = path.path('training.py').abspath()
+sys.path.append(directory.parent.parent)
+#import procgen.ProcgenGym3Env
+from procgen_again.procgen import ProcgenGym3Env
 
 def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
 	agent_healths = np.array([1, 2, 3, 4])  # Training agent healths to use
@@ -20,7 +23,7 @@ def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
 	Nfeats = 6720 # Input feature dimension
 
 	#env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
-	env = gym.make(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
+	env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
 	# N.B. the agent_health argument is irrelevant--we do not use the returns computed by the environment/cpp code
 
 	w = np.zeros((Nagents, Nhealths, Nfeats))
