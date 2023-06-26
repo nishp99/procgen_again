@@ -1,6 +1,7 @@
 import gym3
 from gym3 import types_np
 import numpy as np
+import os
 import sys
 
 current = os.path.dirname(os.path.realpath('evaluation.py'))
