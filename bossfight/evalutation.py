@@ -14,13 +14,13 @@ from procgen import ProcgenGym3Env
 def evaluate(file_path, save_path,eval_episodes=1000, alpha=1e-6):
 
 	data = np.load(file_path, allow_pickle = True)
-	ws = data['arr_0']
-	Nagents = data['arr_1']
-	Nints = data['arr_2']
-	Nfeats = data['arr_3']
-	agent_healths = data['arr_4']
+	ws = data['ws']
+	Nagents = data['Nagents']
+	Nints = data['Nints']
+	Nfeats = data['Nfeats']
+	agent_healths = data['agent_healths']
 	Nhealths = agent_healths.shape[0]
-	save_points = data['arr_5']
+	save_points = data['save_points']
 
 	env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
 
