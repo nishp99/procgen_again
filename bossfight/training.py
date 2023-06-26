@@ -8,7 +8,7 @@ current = os.path.dirname(os.path.realpath('training.py'))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 #import procgen.ProcgenGym3Env
-from procgen_again.procgen import ProcgenGym3Env
+from procgen import ProcgenGym3Env
 
 def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
 	agent_healths = np.array([1, 2, 3, 4])  # Training agent healths to use

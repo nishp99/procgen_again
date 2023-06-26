@@ -7,7 +7,7 @@ current = os.path.dirname(os.path.realpath('evaluation.py'))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 #import procgen.ProcgenGym3Env
-from procgen_again.procgen import ProcgenGym3Env
+from procgen import ProcgenGym3Env
 # Evaluate agents using softmax policy
 
 def evaluate(file_path, save_path,eval_episodes=1000, alpha=1e-6):
