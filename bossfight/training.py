@@ -44,6 +44,7 @@ def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
 
 		for i in range(Nagents):
 			if step[i] > 0 and first[i]:  # First step of new episode
+				print(step[i])
 				step[i] = 0
 
 				total_episodes[i] += 1
