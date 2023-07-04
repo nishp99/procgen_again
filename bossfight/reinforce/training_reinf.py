@@ -10,7 +10,8 @@ import utils
 
 current = os.path.dirname(os.path.realpath('training.py'))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+parent_parent = os.path.pardir(parent)
+sys.path.append(parent_parent)
 #import procgen.ProcgenGym3Env
 from procgen import ProcgenGym3Env
 
