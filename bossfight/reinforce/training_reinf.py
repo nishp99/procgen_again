@@ -1,8 +1,12 @@
 import gym3
 from gym3 import types_np
 import numpy as np
+import torch
+import torch.optim as optim
 import os
 import sys
+import utils
+
 
 current = os.path.dirname(os.path.realpath('training.py'))
 parent = os.path.dirname(current)
@@ -10,113 +14,146 @@ sys.path.append(parent)
 #import procgen.ProcgenGym3Env
 from procgen import ProcgenGym3Env
 
-def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10): #,agent_health as additional parameter
-	agent_healths = np.array([1, 2, 3, 4])  # Training agent healths to use
-	Nhealths = agent_healths.shape[0]
+def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, lr=2e-4, discount=0.995, beta=0.01): #,agent_health as additional parameter
+	file_path = os.path.join(data_path, f'data_dic.npy')
 
-	#^above not needed
+	model_path = os.path.join(data_path, f'model.pt')
 
-	save_points = np.unique(np.round(np.logspace(0,np.log10(max_episodes),110))) # A vector of episodes to save the weights at
+	RIGHT = 7
+	LEFT = 0
+
+	device = utils.device
+	policy = utils.Policy().to(device)
+	optimizer = optim.Adam(policy.parameters(), lr)
+
+	"""save_points = np.unique(np.round(np.logspace(0,np.log10(max_episodes),110))) # A vector of episodes to save the weights at
 	Nints = save_points.shape[0]
-	save_ind = np.ones(Nagents)
+	save_ind = np.ones(Nagents)"""
 
 	T=100
+	episode_length = int(T/2 + 1)
 	# Maximum episode length. N.B. this is currently hard-coded in the C++ code and cannot be changed by changing this constant
-	Nfeats = 6720 # Input feature dimension
-	#^above not needed
 
-	#env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
+	#this implementation of vectorised environment could have errors later on in code due to differences to parallel_env.py
 	env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
 	# N.B. the agent_health argument is irrelevant--we do not use the returns computed by the environment/cpp code
 
-	w = np.zeros((Nagents, Nhealths, Nfeats))
-	ws = np.zeros((Nagents, Nints+1, Nhealths, Nfeats))
-	y = np.zeros((Nagents, T+2))
-	#y = np.zeros((Nagents, T/2+1))
-	X = np.zeros((Nagents, Nfeats, T+2))
-	#X = np.zeros((Nagents, Nfeats, T/2 + 1))
-	acts = np.zeros(Nagents)
-	a = np.zeros(Nagents)
-	step = np.zeros(Nagents)
-	#step = 0
+	step = 0
+	total_episodes = 0
 
-	total_episodes = np.zeros(Nagents)
-	#total episodes = 0
-	successful_episodes = np.zeros((Nagents, Nhealths))
-	#successful_episodes = np.zeros(Nagents)
+	dic = dict()
+	dic['training'] = np.zeros((max_episodes, Nagents))
+	dic['generalisation'] = np.zeros((max_episodes, Nagents))
+
+	rews = np.zeros(episode_length, Nagents)
 	cumulative_rew = np.zeros(Nagents)
 
-	while any(total_episodes <= max_episodes):
-		rew, obs, first = env.observe()
-		"""
-		change to observe, take a do nothing step, then observe to get two frame informations
-		rew_1, obs_1, first_1 = env.observe()
-		if any(first_1):
+	state_list = []
+	prob_list = []
+	action_list = []
+
+
+	while total_episodes <= max_episodes:
+		#change to observe, take a do nothing step, then observe to reduce number of total observations within episode
+		#can change this after, lets see how it works out first
+		rew, obs_1, done = env.observe()
+		cumulative_rew += rew
+		if any(done):
+			#done = done_1
+			#obs_1, obs_2 = obs_2, obs_1
 			pass
 		else:
-			env.act([4]*Nagents) #do nothing
-			rew_2, obs_2, first_2 = env.observe()
-		"""
+			env.act([4]*Nagents) #do nothing action in all environments
+			rew_2, obs_2, done = env.observe()
+			cumulative_rew += rew_2
+			rew += rew_2
+			#done = done_2
 
-		#can switch to fully vectorised updates get rid of looping through agents
-		for i in range(Nagents):
-			if step[i] > 0 and first[i]:  # First step of new episode
-			#if step > 0 and np.any(first):
-				step[i] = 0
-				#step = 0
+		rews[step, :] = np.copy(rew)
 
-				total_episodes[i] += 1
+		#if episode complete
+		if step > 0 and np.any(done):
+			successful_episode = cumulative_rew > -agent_health
+			generalisation_success = cumulative_rew > -1  #we can do generalisation performance at the same time as training!
 
-				successful_episode = cumulative_rew[i] > -agent_healths  # Vectorized for all agent healths
-				#successful_episode = cumulative_rew > -agent_health
+			dic['training'][total_episodes, :] = successful_episode.astype(int)
+			dic['generalisation'][total_episodes, :] = generalisation_success.astype(int)
 
-				successful_episodes[i, :] += successful_episode
-				#successful_episodes[i] += successful_episode
-				rewards = successful_episode.astype(int)
-				rewards[rewards == 0] = -penalty
+			#rewards calculated from successful/unsuccessful episodes
+			end_rewards = successful_episode.astype(int)
 
-				# REINFORCE update
-				u = np.mean(y[i, :] * X[i, :, :], axis=1).T
-				w[i, :, :] = w[i, :, :] + alpha * np.outer(rewards, u)  # Vectorized for all agent healths
-
-				"""
-				replace with backward on loss
-				"""
-
-				"""
-				if 'i' = Nagents-1, update weights
-				"""
-
-				cumulative_rew[i] = 0
-
-				if any(save_points == total_episodes[i]):
-					ws[i, save_ind[i].astype(int), :, :] = w[i, :, :]
-					save_ind[i] += 1
-					if i == 0:
-						print(f"Saved episode {total_episodes[i]}")
-
-				if i == 0 and total_episodes[i] % 1000 == 0:
-					print(f"Iteration {total_episodes[i]}")
-
-			x = obs['rgb'][i, 0:35, :, :].flatten()
-			X[i, :, step[0].astype(int)] = x
-			a[i] = np.random.rand() - 1 / 2  # Pure random policy
 			"""
-			shape observation, and input into network for action to take
-			
-			
-			
+			go through rews, using end_rewards as a mask check for failed episodes, find their indices
+			loop through indices, for each failed episode find nth (Nagent'th) instance of non-zero element
+			set all elements before this and after this to zero
+			set the nth element to penalty
+			loop through successful episodes
+			set all elements to zero except final element set to 1
 			"""
+			fail_indices = np.where(end_rewards == 0)[0]
+			success_indices = np.where(end_rewards != 0)[0]
 
-			if a[i] > 0:
-				acts[i] = 0  # Left
-				y[i, step[i].astype(int)] = 1
-			else:
+			for i in range(np.shape(fail_indices)[0]):
+				count = 1
+				for j in range(episode_length):
+					if rews[j, fail_indices[i]] < 0:
+						if count == agent_health:
+							rews[:, fail_indices[i]] = np.zeros(episode_length)
+							rews[j, fail_indices[i]] = penalty
+							break
+						else:
+							count += 1
 
-				acts[i] = 7  # Right
-				y[i, step[i].astype(int)] = -1
+			for i in range(np.shape(success_indices)[0]):
+				rews[:, success_indices[i]] = np.zeros(episode_length)
+				rews[-1, success_indices[i]] = 1
 
-			step[i] += 1
+
+			"""
+			backward on loss
+			"""
+			L = -utils.surrogate(policy, prob_list, state_list, action_list, rews, discount, beta)
+			optimizer.zero_grad()
+			L.backward()
+			optimizer.step()
+			del L
+
+			total_episodes += 1
+			#reset all values
+			step = 0
+			cumulative_rew = np.zeros(Nagents)
+			beta *= 0.995 #reduces exploration in later runs
+
+			#not necessary to save the weights if we calculate generalisation performance whilst training
+			"""if any(save_points == total_episodes):
+				true_model_path = os.path.join(model_path, f'model{total_episodes}.pt')
+				torch.save(policy.state_dict(), true_model_path)
+				print(f"Saved episode {total_episodes}")"""
+
+			if total_episodes % 10000 == 0:
+				torch.save(policy.state_dict(), model_path)
+				np.save(file_path, dic)
+				print(f"Iteration {total_episodes}")
+
+
+		#require function to clean and batch frame, ready for input to network
+		#need to turn into torch tensor and make channels the 2nd axis
+		#then centre images (take away per channel mean values) and divide by 255?
+		# (Nagents, 64, 64, 3)
+		batch_input = utils.preprocess_batch(obs_2['rgb'])
+		# probs will only be used as the pi_old
+		# no gradient propagation is needed
+		# so we move it to the cpu
+		probs = policy(batch_input).squeeze().cpu().detach().numpy()
+		acts = np.where(np.random.rand(Nagents) < probs, RIGHT, LEFT)
+		probs = np.where(acts == RIGHT, probs, 1.0 - probs)
+
+		#store the results
+		state_list.append(batch_input)
+		prob_list.append(probs)
+		action_list.append(acts)
+
+		step += 1
 
 		env.act(acts)  # Take actions in all envs
-	np.savez(file_path,ws=ws, Nagents=Nagents, Nints=Nints, Nfeats=Nfeats, agent_healths=agent_healths, save_points=save_points)
+	return None
