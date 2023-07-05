@@ -137,6 +137,7 @@ class Policy(nn.Module):
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = x.view(-1, self.size)
+        #x = x.view(-1, self.size)
+        x = x.reshape(-1, self.size)
         x = F.relu(self.fc1(x))
         return self.sig(self.fc2(x))
