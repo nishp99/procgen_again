@@ -31,7 +31,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	save_ind = np.ones(Nagents)"""
 
 	T=100
-	episode_length = int(T/2 + 2)
+	episode_length = int(T/2 + 1)
 	# Maximum episode length. N.B. this is currently hard-coded in the C++ code and cannot be changed by changing this constant
 
 	#this implementation of vectorised environment could have errors later on in code due to differences to parallel_env.py
@@ -69,7 +69,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 			rew += rew_2
 			#done = done_2
 
-		rews[step, :] = np.copy(rew)
+		#rews[step, :] = np.copy(rew)
 
 		#if episode complete
 		if step > 0 and np.any(done):
@@ -150,6 +150,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 		probs = np.where(acts == RIGHT, probs, 1.0 - probs)
 
 		#store the results
+		rews[step, :] = np.copy(rew)
 		state_list.append(batch_input)
 		prob_list.append(probs)
 		action_list.append(acts)
