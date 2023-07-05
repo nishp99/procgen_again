@@ -45,7 +45,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	dic['training'] = np.zeros((max_episodes, Nagents))
 	dic['generalisation'] = np.zeros((max_episodes, Nagents))
 
-	rews = np.zeros(episode_length, Nagents)
+	rews = np.zeros((episode_length, Nagents))
 	cumulative_rew = np.zeros(Nagents)
 
 	state_list = []
