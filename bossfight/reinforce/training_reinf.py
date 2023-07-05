@@ -48,6 +48,10 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	rews = np.zeros((episode_length, Nagents))
 	cumulative_rew = np.zeros(Nagents)
 
+	state_list = []
+	prob_list = []
+	action_list = []
+
 
 	while total_episodes <= max_episodes:
 		#change to observe, take a do nothing step, then observe to reduce number of total observations within episode
