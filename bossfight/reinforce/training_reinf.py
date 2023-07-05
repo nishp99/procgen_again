@@ -14,6 +14,7 @@ sys.path.append(os.path.join(parent, '..'))
 #import procgen.ProcgenGym3Env
 from procgen import ProcgenGym3Env
 
+
 def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, lr=2e-4, discount=0.995, beta=0.01): #,agent_health as additional parameter
 	file_path = os.path.join(data_path, f'data_dic.npy')
 
@@ -44,6 +45,9 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	dic = dict()
 	dic['training'] = np.zeros((max_episodes+1, Nagents))
 	dic['generalisation'] = np.zeros((max_episodes+1, Nagents))
+
+	torch.save(policy.state_dict(), model_path)
+	np.save(file_path, dic)
 
 	rews = np.zeros((episode_length, Nagents))
 	cumulative_rew = np.zeros(Nagents)
