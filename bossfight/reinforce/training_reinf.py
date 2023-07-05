@@ -63,7 +63,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 			#obs_1, obs_2 = obs_2, obs_1
 			pass
 		else:
-			env.act([4]*Nagents) #do nothing action in all environments
+			env.act(4*np.zeros(Nagents)) #do nothing action in all environments
 			rew_2, obs, done = env.observe()
 			cumulative_rew += rew_2
 			rew += rew_2
