@@ -31,7 +31,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	save_ind = np.ones(Nagents)"""
 
 	T=100
-	episode_length = int(T/2 + 1)
+	episode_length = int(T/2 + 2)
 	# Maximum episode length. N.B. this is currently hard-coded in the C++ code and cannot be changed by changing this constant
 
 	#this implementation of vectorised environment could have errors later on in code due to differences to parallel_env.py
