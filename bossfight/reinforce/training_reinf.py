@@ -56,7 +56,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	while total_episodes <= max_episodes:
 		#change to observe, take a do nothing step, then observe to reduce number of total observations within episode
 		#can change this after, lets see how it works out first
-		rew, obs_1, done = env.observe()
+		rew, obs, done = env.observe()
 		cumulative_rew += rew
 		if any(done):
 			#done = done_1
@@ -64,7 +64,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 			pass
 		else:
 			env.act([4]*Nagents) #do nothing action in all environments
-			rew_2, obs_2, done = env.observe()
+			rew_2, obs, done = env.observe()
 			cumulative_rew += rew_2
 			rew += rew_2
 			#done = done_2
@@ -140,7 +140,7 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 		#need to turn into torch tensor and make channels the 2nd axis
 		#then centre images (take away per channel mean values) and divide by 255?
 		# (Nagents, 64, 64, 3)
-		batch_input = utils.preprocess_batch(obs_2['rgb'])
+		batch_input = utils.preprocess_batch(obs['rgb'])
 		# probs will only be used as the pi_old
 		# no gradient propagation is needed
 		# so we move it to the cpu
