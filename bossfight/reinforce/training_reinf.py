@@ -48,10 +48,6 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	rews = np.zeros((episode_length, Nagents))
 	cumulative_rew = np.zeros(Nagents)
 
-	state_list = []
-	prob_list = []
-	action_list = []
-
 
 	while total_episodes <= max_episodes:
 		#change to observe, take a do nothing step, then observe to reduce number of total observations within episode
@@ -123,6 +119,9 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 			step = 0
 			cumulative_rew = np.zeros(Nagents)
 			beta *= 0.995 #reduces exploration in later runs
+			state_list = []
+			prob_list = []
+			action_list = []
 
 			#not necessary to save the weights if we calculate generalisation performance whilst training
 			"""if any(save_points == total_episodes):
