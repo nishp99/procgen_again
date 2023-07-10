@@ -10,7 +10,7 @@ sys.path.append(parent)
 #import procgen.ProcgenGym3Env
 from procgen import ProcgenGym3Env
 
-def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
+def train(file_path, eta, penalty, alpha, max_episodes, Nagents):
 	agent_healths = np.array([1, 2, 3, 4])  # Training agent healths to use
 	Nhealths = agent_healths.shape[0]
 
@@ -57,7 +57,7 @@ def train(file_path, penalty=0, alpha=1, max_episodes=500000, Nagents=10):
 
 				# REINFORCE update
 				u = np.mean(y[i, :] * X[i, :, :], axis=1).T
-				w[i, :, :] = w[i, :, :] + alpha * np.outer(rewards, u)  # Vectorized for all agent healths
+				w[i, :, :] = w[i, :, :] + alpha * np.outer(rewards, u) * eta # Vectorized for all agent healths
 
 				cumulative_rew[i] = 0
 
