@@ -143,8 +143,8 @@ def train(data_path, agent_health, policy, penalty=0, max_episodes=500000, Nagen
 				torch.save(policy.state_dict(), true_model_path)
 				print(f"Saved episode {total_episodes}")"""
 
-			#if total_episodes % 10000 == 0:
-			if total_episodes % 1 == 0:
+			if total_episodes % 10000 == 0:
+			#if total_episodes % 1 == 0:
 				torch.save(policy.state_dict(), model_path)
 				np.save(file_path, dic)
 				print(f"Iteration {total_episodes}")
