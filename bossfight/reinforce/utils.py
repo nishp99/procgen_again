@@ -150,7 +150,7 @@ class Shallow(nn.Module):
         flatten to 6720
         pass through sigmoid
         """
-        super(Policy, self).__init__()
+        super(Shallow, self).__init__()
         self.size = 6720
 
         # fully connected layer
@@ -179,7 +179,7 @@ class Twolayer(nn.Module):
         fully connected to 1
         sigmoid
         """
-        super(Policy, self).__init__()
+        super(Twolayer, self).__init__()
         self.size = 6720
 
         # fully connected layer
