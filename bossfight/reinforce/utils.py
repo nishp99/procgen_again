@@ -141,3 +141,60 @@ class Policy(nn.Module):
         x = x.reshape(-1, self.size)
         x = F.relu(self.fc1(x))
         return self.sig(self.fc2(x))
+
+class Shallow(nn.Module):
+    def __init__(self):
+        """
+        proposed dimension transformations
+        chop off to 3, 35 , 64
+        flatten to 6720
+        pass through sigmoid
+        """
+        super(Policy, self).__init__()
+        self.size = 6720
+
+        # fully connected layer
+        self.fc1 = nn.Linear(self.size, 1)
+
+        # Sigmoid to
+        self.sig = nn.Sigmoid()
+
+        # flatten
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        x = x[:, :, :35, :]
+        x = self.flatten(x)
+        x = self.fc1(x)
+        return self.sig(x)
+
+class Twolayer(nn.Module):
+    def __init__(self):
+        """
+        proposed transformations
+        chop off to 3, 35 , 64
+        flatten to 6720
+        fully connected to 4480
+        ReLU
+        fully connected to 1
+        sigmoid
+        """
+        super(Policy, self).__init__()
+        self.size = 6720
+
+        # fully connected layer
+        self.fc1 = nn.Linear(self.size, 4480)
+        self.fc2 = nn.Linear(4480, 1)
+
+        # Sigmoid to
+        self.sig = nn.Sigmoid()
+
+        # flatten
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        x = x[:, :, :35, :]
+        x = self.flatten(x)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return self.sig(x)

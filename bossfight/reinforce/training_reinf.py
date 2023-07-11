@@ -15,7 +15,7 @@ sys.path.append(os.path.join(parent, '..'))
 from procgen import ProcgenGym3Env
 
 
-def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, lr=2e-4, discount=0.995, beta=0.01): #,agent_health as additional parameter
+def train(data_path, agent_health, policy, penalty=0, max_episodes=500000, Nagents=10, lr=2e-4, discount=0.995, beta=0.01): #,agent_health as additional parameter
 	file_path = os.path.join(data_path, f'data_dic.npy')
 
 	model_path = os.path.join(data_path, f'model.pt')
@@ -24,7 +24,13 @@ def train(data_path, agent_health, penalty=0, max_episodes=500000, Nagents=10, l
 	LEFT = 0
 
 	device = utils.device
-	policy = utils.Policy().to(device)
+	if policy == 'deep':
+		policy = utils.Policy().to(device)
+	elif policy == 'shallow':
+		policy = utils.Shallow().to(device)
+	elif policy == 'twolayer':
+		policy = utils.Twolayer().to(device)
+
 	optimizer = optim.Adam(policy.parameters(), lr)
 
 	"""save_points = np.unique(np.round(np.logspace(0,np.log10(max_episodes),110))) # A vector of episodes to save the weights at
