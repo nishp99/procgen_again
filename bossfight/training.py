@@ -10,8 +10,8 @@ sys.path.append(parent)
 #import procgen.ProcgenGym3Env
 from procgen import ProcgenGym3Env
 
-def train(file_path, eta, penalty, alpha, max_episodes, Nagents):
-	agent_healths = np.array([1, 2, 3, 4])  # Training agent healths to use
+def train(file_path, train_healths, eta, penalty, alpha, max_episodes, Nagents):
+	agent_healths = np.asarray(train_healths)  # Training agent healths to use
 	Nhealths = agent_healths.shape[0]
 
 	save_points = np.unique(np.round(np.logspace(0,np.log10(max_episodes),110))) # A vector of episodes to save the weights at

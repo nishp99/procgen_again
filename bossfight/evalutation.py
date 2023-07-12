@@ -11,7 +11,7 @@ sys.path.append(parent)
 from procgen import ProcgenGym3Env
 # Evaluate agents using softmax policy
 
-def evaluate(file_path, save_path,eval_episodes=1000, alpha=1e-6):
+def evaluate(file_path, save_path, eval_healths, eval_episodes=1000, alpha=1e-6):
 
 	data = np.load(file_path, allow_pickle = True)
 	ws = data['ws']
@@ -19,16 +19,17 @@ def evaluate(file_path, save_path,eval_episodes=1000, alpha=1e-6):
 	Nints = data['Nints']
 	Nfeats = data['Nfeats']
 	agent_healths = data['agent_healths']
-	Nhealths = agent_healths.shape[0]
+	Ntrain_healths = agent_healths.shape[0]
+	Neval_healths = eval_healths.shape[0]
 	save_points = data['save_points']
 
 	env = ProcgenGym3Env(num=Nagents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
 
-	successful_episodes = np.zeros((Nagents, Nints + 1, Nhealths, Nhealths))  # first Nhealth is train, second is test
+	successful_episodes = np.zeros((Nagents, Nints + 1, Ntrain_healths, Neval_healths))  # first Nhealth is train, second is test
 
 	max_episodes = Nints * eval_episodes
 
-	for j, train_ah in enumerate(agent_healths):
+	for j in range(agent_healths.shape[0]):
 		acts = np.zeros(Nagents)
 		a = np.zeros(Nagents)
 		step = np.zeros(Nagents)
@@ -49,7 +50,7 @@ def evaluate(file_path, save_path,eval_episodes=1000, alpha=1e-6):
 
 					interval = int(total_episodes[i] / eval_episodes)
 
-					successful_episode = cumulative_rew[i] > -agent_healths  # Vectorized for all agent healths
+					successful_episode = cumulative_rew[i] > -eval_healths  # Vectorized for all agent healths
 
 					successful_episodes[i, interval, j, :] += successful_episode
 
