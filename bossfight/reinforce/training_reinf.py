@@ -24,6 +24,7 @@ def train(data_path, agent_health, policy, penalty=0, max_episodes=500000, Nagen
 	LEFT = 0
 
 	device = utils.device
+	# use appropriate policy network
 	if policy == 'deep':
 		policy = utils.Policy().to(device)
 	elif policy == 'shallow':
@@ -38,6 +39,7 @@ def train(data_path, agent_health, policy, penalty=0, max_episodes=500000, Nagen
 	save_ind = np.ones(Nagents)"""
 
 	T=100
+	# we divide by two as two actions are taken every timestep
 	episode_length = int(T/2 + 1)
 	# Maximum episode length. N.B. this is currently hard-coded in the C++ code and cannot be changed by changing this constant
 

@@ -6,7 +6,8 @@ RIGHT = 7
 LEFT = 0
 
 def preprocess_batch(observation):
-    mean = np.mean(observation, axis = (2,3), keepdims=True)
+    observation[:, 28:35, 28:35, :] = 0
+    mean = np.mean(observation, axis=(1, 2), keepdims=True)
     batch_input = (observation - mean)/255
     batch_input = np.moveaxis(batch_input, 3, 1)
     return torch.from_numpy(batch_input).float().to(device)
