@@ -12,7 +12,7 @@ from procgen import ProcgenGym3Env
 # Evaluate agents using softmax policy
 
 def evaluate(file_path, save_path, eval_healths, eval_episodes=1000, alpha=1e-6):
-
+	eval_healths = np.asarray(eval_healths)
 	data = np.load(file_path, allow_pickle = True)
 	ws = data['ws']
 	Nagents = data['Nagents']
