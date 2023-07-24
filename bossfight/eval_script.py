@@ -26,7 +26,10 @@ os.makedirs(training_path, exist_ok = True)
 evaluation_path = os.path.join(data, "evaluation_data")
 os.makedirs(evaluation_path, exist_ok = True)
 
-outputpath = os.path.join(results_run, "outputs")
+true_evaluation_path = os.path.join(evaluation_path, run_timestamp)
+os.makedirs(true_evaluation_path, exist_ok=True)
+
+outputpath = os.path.join(true_evaluation_path, "outputs")
 os.makedirs(outputpath, exist_ok = True)
 
 executor = submitit.AutoExecutor(folder=outputpath)
@@ -43,5 +46,5 @@ eps = 1000000
 
 with executor.batch():
 	for penalty in penalties:
-		job = executor.submit(run, training_path=training_path, evaluation_path=evaluation_path, train_healths=train_healths, eval_healths=eval_healths, eta=eta, penalty=penalty, alpha=1, beta=1e-6, max_episodes=eps, Nagents=10, eval_episodes=1000)
+		job = executor.submit(run, training_path=training_path, evaluation_path=true_evaluation_path, train_healths=train_healths, eval_healths=eval_healths, eta=eta, penalty=penalty, alpha=1, beta=1e-6, max_episodes=eps, Nagents=10, eval_episodes=1000)
 		jobs.append(job)
