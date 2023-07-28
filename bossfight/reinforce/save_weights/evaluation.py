@@ -40,7 +40,7 @@ def evaluate(data_path, weights_path, policy, max_episodes, num_save_points, eva
 	for i, t in enumerate(save_points):
 		save_index = int(t)
 		true_model_path = os.path.join(weights_path, f'{save_index}.pt')
-		policy.load_state_dict(torch.load(true_model_path))
+		policy.load_state_dict(torch.load(true_model_path, map_location=torch.device('cpu')))
 
 		#instantiate environment
 		env = ProcgenGym3Env(num=eval_agents, env_name="bossfight", agent_health=5, use_backgrounds=False, restrict_themes=True)
