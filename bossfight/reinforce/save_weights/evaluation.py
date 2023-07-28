@@ -38,7 +38,8 @@ def evaluate(data_path, weights_path, policy, max_episodes, num_save_points, eva
 		policy = utils.Twolayer().to(device)
 
 	for i, t in enumerate(save_points):
-		true_model_path = os.path.join(weights_path, f'{t}.pt')
+		save_index = int(t)
+		true_model_path = os.path.join(weights_path, f'{save_index}.pt')
 		policy.load_state_dict(torch.load(true_model_path))
 
 		#instantiate environment
